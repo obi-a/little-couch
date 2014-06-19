@@ -3,16 +3,12 @@
   (:require [clj-http.client :as client]))
 
 
-(defn setup [& args]
-  (def settings (first args))
-  (def database (get settings :database ""))
-  (def address (get settings :address "http://127.0.0.1"))
-  (def port (get settings :port "5984"))
-  (def username (get settings :username))
-  (def password (get settings :password))
-   settings)
+(defn db-setup
+  [& args]
+  (let [{:keys [database address port username password], :or {database "" address "http://127.0.0.1" port "5984" username "" password ""} }
+               (first args)]
+              {:database database :address address :port port :username username :password password}))
 
-(defn create []
-  (parse-string (get (client/put (str address ":" port "/" database) {:content-type :json}) :body)
+(defn create [x]
+  (parse-string (get (client/put (str (:address x) ":" (:port x) "/" (:database x)) {:content-type :json}) :body)
     true))
-
