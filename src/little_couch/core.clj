@@ -10,5 +10,8 @@
               {:database database :address address :port port :username username :password password}))
 
 (defn create [x]
-  (parse-string (get (client/put (str (:address x) ":" (:port x) "/" (:database x)) {:content-type :json}) :body)
-    true))
+  (try
+   (parse-string (:body (client/put (str (:address x) ":" (:port x) "/" (:database x)) {:content-type :json :throw-entire-message? true} ))
+    true)
+    (catch Exception e (.getMessage e)
+      (throw e))))
