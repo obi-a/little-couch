@@ -25,7 +25,7 @@
     true))
 
 (defn get-doc [x, doc_id]
-  (parse-string (:body (client/get (database_address x doc_id) {:throw-entire-message? true} ))
+  (parse-string (:body (client/get (database_address x doc_id) {:throw-entire-message? true}))
     true))
 
  (defn delete-doc
@@ -33,3 +33,15 @@
    ([x, doc_id, rev]
    (parse-string (:body (client/delete (str (database_address x doc_id) "?rev=" rev) {:throw-entire-message? true} ))
     true)))
+
+ (defn update-doc [x, doc_id, data]
+   (parse-string (:body (client/put (database_address x doc_id) {:body (generate-string data), :throw-entire-message? true} ))
+    true))
+
+ (defn edit-doc [x, doc_id, data-map]
+    (update-doc x doc_id
+            (assoc data-map :_rev (:_rev
+                                    (get-doc x doc_id)))))
+
+
+
