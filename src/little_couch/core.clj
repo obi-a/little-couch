@@ -25,7 +25,7 @@
 
 (defn ^:private database_address
    ([x] (str (:address x) ":" (:port x) "/" (:database x)))
-   ([x doc_id] (str (:address x) ":" (:port x) "/" (:database x) "/" doc_id)))
+   ([x doc-id] (str (:address x) ":" (:port x) "/" (:database x) "/" doc-id)))
 
  (defn db-setup
   [& args]
@@ -40,24 +40,26 @@
 (defn delete [x]
   (:body (client/delete (database_address x) (http-options x))))
 
-(defn create-doc [x, doc_id, doc]
-  (:body (client/put (database_address x doc_id) (http-options x {:body (generate-string doc)} ) )))
+(defn create-doc [x, doc-id, doc]
+  (:body (client/put (database_address x doc-id) (http-options x {:body (generate-string doc)} ) )))
 
-(defn get-doc [x, doc_id]
-  (:body (client/get (database_address x doc_id) (http-options x))))
+(defn get-doc [x, doc-id]
+  (:body (client/get (database_address x doc-id) (http-options x))))
 
  (defn delete-doc
-   ([x, doc_id] (delete-doc x doc_id (:_rev (get-doc x, doc_id))))
-   ([x, doc_id, rev]
-      (:body (client/delete (str (database_address x doc_id) "?rev=" rev) (http-options x)))))
+   ([x, doc-id] (delete-doc x doc-id (:_rev (get-doc x, doc-id))))
+   ([x, doc-id, rev]
+      (:body (client/delete (str (database_address x doc-id) "?rev=" rev) (http-options x)))))
 
- (defn update-doc [x, doc_id, data]
-   (:body (client/put (database_address x doc_id) (http-options x {:body (generate-string data)}))))
+ (defn update-doc [x, doc-id, data]
+   (:body (client/put (database_address x doc-id) (http-options x {:body (generate-string data)}))))
 
- (defn edit-doc [x, doc_id, data-map]
-    (update-doc x doc_id
+ (defn edit-doc [x, doc-id, data-map]
+    (update-doc x doc-id
             (assoc data-map :_rev (:_rev
-                                    (get-doc x doc_id)))))
+                                    (get-doc x doc-id)))))
+
+ (defn view [x, design-doc-name, & rest ])
 
 
 

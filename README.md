@@ -4,7 +4,32 @@ Clojure Interface to CouchDB, I'm using this to learn Clojure. A clojure re-writ
 
 ## Usage
 
-FIXME
+##Specification
+Create design documents
+
+```clojure
+(def x (db-setup {:database "my_database"}))
+
+(create-doc x "_design/my_doc"
+{
+ :language "javascript",
+ :views {
+   :get_emails {
+     :map "function(doc){ if(doc.firstname && doc.email) emit(doc.id,{Name: doc.firstname, Email: doc.email}); }"
+   }
+ }
+})
+;;{:ok true, :id "_design/my_doc", :rev "1-271b38abf2ac551c5263be4ba9ab56df"}
+
+(get-doc x "_design/my_doc")
+;;{:_id "_design/my_doc", :_rev "1-271b38abf2ac551c5263be4ba9ab56df", :language "javascript", :views {:get_emails {:map "function(doc){ if(doc.firstname && doc.email) emit(doc.id,{Name: doc.firstname, Email: doc.email}); }"}}}
+```
+
+###views
+```clojure
+(view x design-doc-name, view-name, & options)
+```
+
 
 ## License
 
