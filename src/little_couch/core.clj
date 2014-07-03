@@ -59,7 +59,9 @@
             (assoc data-map :_rev (:_rev
                                     (get-doc x doc-id)))))
 
- (defn view [x, design-doc-name, & rest ])
+ (defn view [x, design-doc-name, view-name, & rest]
+   (:body (client/get (str (database_address x design-doc-name) "/_view/" view-name) (http-options x {:query-params (first rest)} ))))
+
 
 
 
