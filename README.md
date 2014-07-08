@@ -39,6 +39,11 @@ Query the view
 
 ```
 
+Dynamic Query
+```clojure
+where(x attributes-map options-map)
+```
+
 
 ## License
 

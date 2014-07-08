@@ -65,14 +65,25 @@
    [x, doc-id, data-map]
    (update-doc x
                doc-id
-               (assoc data-map :_rev (:_rev (get-doc x
-                                                     doc-id)))))
+               (assoc data-map
+                      :_rev (:_rev (get-doc x
+                                            doc-id)))))
 
  (defn view
    [x, design-doc-name, view-name, & rest]
    (:body (client/get (str (database_address x design-doc-name) "/_view/" view-name)
                       (http-options x
                                     {:query-params (first rest)} ))))
+
+ (defn where
+   [x, attributes-map, options-map] )
+
+ (defn view-only-docs
+   [x, design-doc-name, view-name, & rest]
+   (map :doc
+        (:rows (view x design-doc-name view-name (assoc (first rest)
+                                                        :include_docs true)))))
+
 
 
 
