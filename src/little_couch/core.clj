@@ -75,15 +75,40 @@
                       (http-options x
                                     {:query-params (first rest)} ))))
 
- (defn where
-   [x, attributes-map, options-map] )
-
  (defn view-only-docs
    [x, design-doc-name, view-name, & rest]
    (map :doc
         (:rows (view x design-doc-name view-name (assoc (first rest)
                                                         :include_docs true)))))
 
+ (defn index [keys]
+   (clojure.string/join "_" keys))
+
+ (defn view-name [keys]
+   (str "find_by_keys_"
+        (index keys)))
+
+ (defn design-doc-name [keys]
+   (str "_design/" (index keys) "_keys_finder"))
+
+ (defn add-multiple-finder [x keys]
+   (create-doc x
+               (design-doc-name keys)
+               {:language "javascript",
+                :views {
+                          (view-name keys) {
+                            :map (str "function(doc){ if(doc." (clojure.string/join " && doc." keys) ") emit([doc." (clojure.string/join ",doc." keys) "]);}")
+                          }
+                        }
+                }))
+
+ (defn where
+   ;;WIP
+   [x, attributes, options-map]
+   (view-only-docs x
+                   (design-doc-name (map name (keys attributes)))
+                   (assoc options-map {:startkey (str (vals attributes))
+                                       :endkey (str (vals attributes))})))
 
 
 
