@@ -102,13 +102,25 @@
                         }
                 }))
 
+ (defn dynamic-query [x attributes options-map]
+   (view-only-docs x
+                     (design-doc-name (map name (keys attributes)))
+                     (view-name (map name (keys attributes)))
+
+                   (assoc options-map :startkey  (str (into [] (vals attributes)))
+                                        :endkey   (str (into [] (vals attributes))))
+                   ))
+
  (defn where
    ;;WIP
    [x, attributes, options-map]
-   (view-only-docs x
-                   (design-doc-name (map name (keys attributes)))
-                   (assoc options-map {:startkey (str (vals attributes))
-                                       :endkey (str (vals attributes))})))
+   (try
+      (dynamic-query x attributes options-map)
+     (catch Exception e
+                      (do (throw e)
+                        ;;(add-multiple-finder x (map name (keys attributes)))
+                        ;;(dynamic-query x attributes options-map)
+                        ))))
 
 
 
