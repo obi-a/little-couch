@@ -77,21 +77,22 @@
 
  (defn view-only-docs
    [x, design-doc-name, view-name, & rest]
+   (print-str
    (map :doc
         (:rows (view x design-doc-name view-name (assoc (first rest)
-                                                        :include_docs true)))))
+                                                        :include_docs true))))))
 
- (defn index [keys]
+ (defn ^:private index [keys]
    (clojure.string/join "_" keys))
 
- (defn view-name [keys]
+ (defn ^:private view-name [keys]
    (str "find_by_keys_"
         (index keys)))
 
- (defn design-doc-name [keys]
+ (defn ^:private design-doc-name [keys]
    (str "_design/" (index keys) "_keys_finder"))
 
- (defn add-multiple-finder [x keys]
+ (defn ^:private add-multiple-finder [x keys]
    (create-doc x
                (design-doc-name keys)
                {:language "javascript",
@@ -99,28 +100,26 @@
                           (view-name keys) {
                             :map (str "function(doc){ if(doc." (clojure.string/join " && doc." keys) ") emit([doc." (clojure.string/join ",doc." keys) "]);}")
                           }
-                        }
+                       }
                 }))
 
- (defn dynamic-query [x attributes options-map]
+ (defn ^:private dynamic-query [x attributes options-map]
    (view-only-docs x
-                     (design-doc-name (map name (keys attributes)))
-                     (view-name (map name (keys attributes)))
-
-                   (assoc options-map :startkey  (str (into [] (vals attributes)))
-                                        :endkey   (str (into [] (vals attributes))))
-                   ))
+                   (design-doc-name (map name (keys attributes)))
+                   (view-name (map name (keys attributes)))
+                   (assoc options-map :startkey (generate-string (vals attributes))
+                                      :endkey (generate-string (vals attributes)))))
 
  (defn where
-   ;;WIP
-   [x, attributes, options-map]
+   [x, attributes & others ]
    (try
-      (dynamic-query x attributes options-map)
+     (dynamic-query x attributes (first others))
      (catch Exception e
-                      (do (throw e)
-                        ;;(add-multiple-finder x (map name (keys attributes)))
-                        ;;(dynamic-query x attributes options-map)
-                        ))))
+       (do
+         ;;(println (.getMessage e))
+         (add-multiple-finder x (map name (keys attributes)))
+         (dynamic-query x attributes (first others))))))
+
 
 
 
