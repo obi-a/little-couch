@@ -120,8 +120,16 @@
          (add-multiple-finder x (map name (keys attributes)))
          (dynamic-query x attributes (first others))))))
 
+ (defn get-security-object
+   [x]
+   (:body (client/get (str (database_address x) "/_security/")
+                      (http-options x))))
 
-
+ (defn set-security-object
+   [x security-settings]
+   (:body (client/put (str (database_address x) "/_security/")
+                      (http-options x
+                                    {:body (generate-string security-settings)}))))
 
 
 

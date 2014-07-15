@@ -119,6 +119,17 @@ Sample usage
 
 ```
 
+Security object
+
+```clojure
+(set-security-object x {:admins {:names ["david"], :roles ["admin"]},
+                         :readers {:names ["david"], :roles ["admin"]}})
+;;{:ok true}
+
+(get-security_object x)
+;;{:readers {:roles ["admin"], :names ["david"]}, :admins {:roles ["admin"], :names ["david"]}}
+```
+
 
 ## License
 
