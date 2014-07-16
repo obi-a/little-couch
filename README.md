@@ -130,6 +130,35 @@ Security object
 ;;{:readers {:roles ["admin"], :names ["david"]}, :admins {:roles ["admin"], :names ["david"]}}
 ```
 
+CouchDB Configuration
+```clojure
+(def y (db-setup))
+
+;;form: (get-config y section option)
+;;returns corresonding for the option value
+
+(get-config y "log" "file")
+;;"/var/log/couchdb/couch.log"
+
+(get-config y "httpd" "port")
+;;"5984"
+
+
+;;form: (set-config y section option value)
+
+(set-config y "couch_httpd_auth" "timeout" "6000")
+;;true
+
+(get-config y "couch_httpd_auth" "timeout")
+;;"6000"
+
+
+;;form: (delete-config y section option)
+
+(delete-config y "foo" "bar")
+;;true
+```
+
 
 ## License
 

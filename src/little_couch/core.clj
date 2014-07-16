@@ -131,6 +131,26 @@
                       (http-options x
                                     {:body (generate-string security-settings)}))))
 
+ (defn ^:private couchdb-config-url
+   [x section option]
+   (str (:address x) ":" (:port x) "/_config/" section "/" option ))
+
+ (defn get-config [x section option]
+   (:body (client/get (couchdb-config-url x section option)
+                      (http-options x))))
+
+ (defn set-config
+   [x section option value]
+   (boolean (:body (client/put (couchdb-config-url x section option)
+                               (http-options x
+                                             {:body (generate-string value)})))))
+
+ (defn delete-config
+   [x section option]
+   (boolean (:body (client/delete (couchdb-config-url x section option)
+                                  (http-options x)))))
+
+
 
 
 
