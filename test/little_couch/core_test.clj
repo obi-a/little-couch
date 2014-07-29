@@ -7,6 +7,9 @@
              :port (or (first others)
                        "5984")}))
 
+(defn unique-db []
+  (db (str "testdb" (System/currentTimeMillis))))
+
 (deftest test-create
   (testing "it creates a database."
     (let [x (db "test-db")]
@@ -27,10 +30,27 @@
 
 (deftest test-delete
   (testing "it deletes a database"
-    (let [x (db (str "testdb" (System/currentTimeMillis)))]
+    (let [x (unique-db)]
       (do (create x))
         (is (= {:ok true} (delete x)))))
   (testing "it throws an exception when the database doesn't exist"
     (let [x (db "dont_exist")]
       (is (thrown? clojure.lang.ExceptionInfo (delete x))))))
+
+(deftest test-create-doc
+  (let [x (unique-db)]
+    (do (create x))
+      (testing "it creates a document"
+        (is (= "linda"
+               (:id (create-doc x "linda" {})))))
+      (testing "it can create a document with keyword or number id"
+        (is (= "1"
+               (:id (create-doc x 1 {})))))
+        (is (= ":linda"
+               (:id (create-doc x :linda {}))))
+      (testing "it throws an exception when document already exists"
+        (is (thrown? clojure.lang.ExceptionInfo  (do (create-doc x "samedoc" {})
+                                                     (create-doc x "samedoc" {})))))
+    (do (delete x))))
+
 
