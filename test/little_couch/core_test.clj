@@ -37,20 +37,41 @@
     (let [x (db "dont_exist")]
       (is (thrown? clojure.lang.ExceptionInfo (delete x))))))
 
+ (defn testing-create-doc [x]
+   (testing "it creates a document"
+     (is (= true
+            (:ok (create-doc x "linda" {})))))
+   (testing "it can create a document with keyword or number id"
+     (is (= true
+            (:ok (create-doc x 1 {})))))
+     (is (= true
+            (:ok (create-doc x :linda {}))))
+   (testing "it throws an exception when document already exists"
+     (is (thrown? clojure.lang.ExceptionInfo (do (create-doc x "samedoc" {})
+                                                 (create-doc x "samedoc" {}))))))
+
 (deftest test-create-doc
   (let [x (unique-db)]
     (do (create x))
-      (testing "it creates a document"
-        (is (= "linda"
-               (:id (create-doc x "linda" {})))))
-      (testing "it can create a document with keyword or number id"
-        (is (= "1"
-               (:id (create-doc x 1 {})))))
-        (is (= ":linda"
-               (:id (create-doc x :linda {}))))
-      (testing "it throws an exception when document already exists"
-        (is (thrown? clojure.lang.ExceptionInfo  (do (create-doc x "samedoc" {})
-                                                     (create-doc x "samedoc" {})))))
+    (testing-create-doc x)
     (do (delete x))))
 
+(defn testing-delete-doc [x id rev]
+  (testing "it deletes a document with revision"
+    (is (= true
+           (:ok (delete-doc x id rev)))))
+  (testing "raises an exception when revision is not found"
+    (is (thrown? clojure.lang.ExceptionInfo (delete-doc x id "unknown-revision"))))
+  (testing "it deletes a document without a revision"
+    (do (create-doc x "goodstuff" {}))
+    (is (= true
+           (:ok (delete-doc x "goodstuff"))))))
 
+(deftest test-delete-doc
+  (let [x (unique-db)]
+    (do (create x)
+        (create-doc x "nancy" {}))
+    (testing-delete-doc x
+                        "nancy"
+                        (:_rev (get-doc x "nancy")))
+    (do (delete x))))
