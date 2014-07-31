@@ -71,16 +71,17 @@
 
  (defn view
    [x, design-doc-name, view-name, & rest]
-   (:body (client/get (str (database_address x design-doc-name) "/_view/" view-name)
-                      (http-options x
-                                    {:query-params (first rest)} ))))
+   (let [[options & more] rest]
+     (:body (client/get (str (database_address x design-doc-name) "/_view/" view-name)
+                        (http-options x
+                                      {:query-params options} )))))
 
  (defn view-only-docs
    [x, design-doc-name, view-name, & rest]
-   (print-str
-   (map :doc
-        (:rows (view x design-doc-name view-name (assoc (first rest)
-                                                        :include_docs true))))))
+   (let [[options & more] rest]
+     (map :doc
+          (:rows (view x design-doc-name view-name (assoc options
+                                                          :include_docs true))))))
 
  (defn ^:private index [keys]
    (clojure.string/join "_" keys))
@@ -112,13 +113,14 @@
 
  (defn where
    [x, attributes & others ]
-   (try
-     (dynamic-query x attributes (first others))
-     (catch Exception e
-       (do
-         ;;(println (.getMessage e))
-         (add-multiple-finder x (map name (keys attributes)))
-         (dynamic-query x attributes (first others))))))
+   (let [[options & more] others]
+     (try
+       (dynamic-query x attributes options)
+       (catch Exception e
+         (do
+           ;;(println (.getMessage e))
+           (add-multiple-finder x (map name (keys attributes)))
+           (dynamic-query x attributes options))))))
 
  (defn get-security-object
    [x]

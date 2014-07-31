@@ -3,9 +3,10 @@
             [little-couch.core :refer :all]))
 
 (defn db [db-name & others]
+  (let [[port & more] others]
   (db-setup {:database db-name
-             :port (or (first others)
-                       "5984")}))
+             :port (or port
+                       "5984")})))
 
 (defn unique-db []
   (db (str "testdb" (System/currentTimeMillis))))
@@ -74,4 +75,35 @@
     (testing-delete-doc x
                         "nancy"
                         (:_rev (get-doc x "nancy")))
+    (do (delete x))))
+
+(defn testing-get-doc [x id]
+  (testing "it gets a document"
+    (is (= id
+           (:_id (get-doc x id)))))
+  (testing "it throws an exception when document is not found"
+    (is (thrown? clojure.lang.ExceptionInfo (get-doc x "dont_exist")))))
+
+(deftest test-get-doc
+  (let [x (unique-db)]
+    (do (create x)
+        (create-doc x "john" {}))
+    (testing-get-doc x "john")
+    (do (delete x))))
+
+(defn testing-update-doc [x id rev]
+  (testing "updates a document using a revision"
+    (is (= true
+           (:ok (update-doc x id {:_rev rev
+                                  :lastname "huey"}))))
+    (is (= "huey"
+           (:lastname (get-doc x id))))))
+
+(deftest test-update-doc
+  (let [x (unique-db)]
+    (do (create x))
+    (testing-update-doc x
+                        "james"
+                        (:rev (create-doc x "james" {:firstname "james"
+                                                     :lastname "brown"})))
     (do (delete x))))
