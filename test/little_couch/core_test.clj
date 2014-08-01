@@ -107,3 +107,22 @@
                         (:rev (create-doc x "james" {:firstname "james"
                                                      :lastname "brown"})))
     (do (delete x))))
+
+(deftest test-edit-doc
+  (let [x (unique-db)]
+    (do (create x)
+        (create-doc x "simpson" {:firstname "bart" :lastname "simpson"}))
+    (testing "it edits a document's existing data"
+      (is (= true
+             (:ok (edit-doc x "simpson" {:firstname "homer"}))))
+      (is (= "homer"
+             (:firstname (get-doc x "simpson")))))
+    (testing "it edits a document adding new data"
+      (is (= true
+             (:ok (edit-doc x "simpson" {:email "simpson@example.com"}))))
+      (is (= "simpson@example.com"
+             (:email (get-doc x "simpson")))))
+    (testing "it raises an exception when document cannot be found"
+      (is (thrown? clojure.lang.ExceptionInfo
+                   (edit-doc x "dont_exist" {:address "something"}))))
+    (do (delete x))))

@@ -151,8 +151,3 @@
    [x section option]
    (boolean (:body (client/delete (couchdb-config-url x section option)
                                   (http-options x)))))
-
-
-
-
-
