@@ -26,9 +26,9 @@
    ([x doc-id] (str (:address x) ":" (:port x) "/" (:database x) "/" doc-id)))
 
  (defn db-setup
-   [& args]
+   [& [db-settings]]
    (let [{:keys [database address port username password], :or {database "" address "http://127.0.0.1" port "5984" username nil password nil} }
-         (first args)]
+         db-settings]
       {:database database, :address address, :port port, :username username, :password password}))
 
 (defn create [x]

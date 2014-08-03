@@ -126,3 +126,20 @@
       (is (thrown? clojure.lang.ExceptionInfo
                    (edit-doc x "dont_exist" {:address "something"}))))
     (do (delete x))))
+
+
+(deftest test-security-object
+  (let [x (unique-db)]
+    (do (create x))
+    (testing "it sets a security object"
+      (is (= true
+             (:ok (set-security-object x {:admins {:names ["david"], :roles ["admin"]},
+                                          :readers {:names ["david"], :roles ["admin"]}}))))
+      (is (= (get-security-object x)
+             {:admins {:names ["david"], :roles ["admin"]},
+              :readers {:names ["david"], :roles ["admin"]}})))
+    (testing "it clears the security object"
+      (do (set-security-object x {}))
+      (is (= {}
+             (get-security-object x))))
+    (do (delete x))))
