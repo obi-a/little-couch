@@ -143,3 +143,45 @@
       (is (= {}
              (get-security-object x))))
     (do (delete x))))
+
+(deftest test-queries
+  (let [x (unique-db)]
+    (do (create x)
+        (create-doc x "christina" {:firstname "christina", :state "new york", :gender "female", :city "bronx", :age 22})
+        (create-doc x "james" {:firstname "james", :state "new york", :gender "male", :city "manhattan", :age 23})
+        (create-doc x "kevin" {:firstname "kevin", :state "new york", :gender "male", :city "bronx", :age 37})
+        (create-doc x "lisa" {:firstname "lisa", :state "new york", :gender "female", :city "manhattan", :age 31})
+        (create-doc x "martin" {:firstname "martin", :state "new york", :gender "male", :city "manhattan", :age 29})
+        (create-doc x "nancy" {:firstname "nancy", :state "new york", :gender "female", :city "bronx", :age 25})
+        (create-doc x "susan" {:firstname "susan", :state "new york", :gender "female", :age 35, :fullname ["susan", "Lee"]})
+        (create-doc x "_design/my_doc" {
+                                        :language "javascript",
+                                        :views {
+                                           :by_gender {
+                                                :map "function(doc){ if(doc.gender) emit(doc.gender); }"
+                                            }
+                                         }
+                                       })
+        (create-doc x "_design/ages"  {
+                                       :language "javascript",
+                                       :views {
+                                          :people_by_age {
+                                             :map "function(doc){ if(doc.age) emit(doc.age); }"
+                                          }
+                                        }
+                                     })
+       (create-doc x "_design/gender_city" {
+                                            :language "javascript",
+                                            :views {
+                                               :people_by_gender_and_city {
+                                                 :map "function(doc){ if(doc.gender && doc.city && doc.age) emit([doc.gender, doc.city, doc.age]);}"
+                                               }
+                                             }
+                                            }))
+    (testing "view: queries a permanent view"
+      (let [results (view x "_design/my_doc" "by_gender")]
+        (is (= 7
+               (count (:rows results))))
+        (is (= "christina"
+               (:id (first (:rows results)))))))
+    (do (delete x))))
