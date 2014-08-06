@@ -175,4 +175,16 @@
                (count (:rows results))))
         (is (= "christina"
                (:id (first (:rows results)))))))
+    (testing "view: can query a view by key"
+      (let [results (view x "_design/my_doc" "by_gender" {:key "\"male\""})]
+        (is (= 3
+               (count (:rows results))))
+        (is (= "james"
+               (:id (first (:rows results)))))
+        (is (= "male"
+               (:key (first (:rows results)))))))
+    (testing "view: can return query results in descending order"
+      (let [results (view x "_design/my_doc" "by_gender" {:key "\"male\"" :descending true})]
+        (is (= "martin"
+               (:id (first (:rows results)))))))
     (do (delete x))))
