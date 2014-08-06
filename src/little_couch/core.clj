@@ -100,9 +100,7 @@
                 :views {
                           (view-name keys) {
                             :map (str "function(doc){ if(doc." (clojure.string/join " && doc." keys) ") emit([doc." (clojure.string/join ",doc." keys) "]);}")
-                          }
-                       }
-                }))
+                          }}}))
 
  (defn ^:private dynamic-query [x attributes options-map]
    (view-only-docs x

@@ -14,14 +14,11 @@ Create design document
 
 (create-doc x
             "_design/my_doc"
-            {
-             :language "javascript",
+            {:language "javascript",
              :views {
                :get_emails {
                              :map "function(doc){ if(doc.firstname && doc.email) emit(doc.id,{Name: doc.firstname, Email: doc.email}); }"
-                           }
-                    }
-            })
+                           }}})
 ;;{:ok true, :id "_design/my_doc", :rev "1-271b38abf2ac551c5263be4ba9ab56df"}
 
 (get-doc x "_design/my_doc")
@@ -90,14 +87,11 @@ Sample usage
 
 (create-doc x
             "_design/gender_city"
-            {
-              :language "javascript",
-              :views {
+            {:language "javascript",
+             :views {
                        :people_by_gender_and_city {
                               :map "function(doc){ if(doc.gender && doc.city && doc.age) emit([doc.gender, doc.city, doc.age]);}"
-                            }
-                      }
-            })
+                            }}})
 (view x
       "_design/gender_city"
       "people_by_gender_and_city"
