@@ -144,7 +144,7 @@
              (get-security-object x))))
     (do (delete x))))
 
-(deftest test-queries
+(deftest test-view
   (let [x (unique-db)]
     (do (create x)
         (create-doc x "christina" {:firstname "christina", :state "new york", :gender "female", :city "bronx", :age 22})
@@ -187,4 +187,45 @@
       (let [results (view x "_design/my_doc" "by_gender" {:key "\"male\"" :descending true})]
         (is (= "martin"
                (:id (first (:rows results)))))))
+    (testing "view: can limit the number of documents returned by query"
+      (let [results (view x "_design/my_doc" "by_gender" {:limit 4})]
+        (is (= 4
+               (count (:rows results))))))
+    (testing "view: can skip some docs in a query result"
+      (let [results (view x "_design/my_doc" "by_gender" {:skip 2})]
+        (is (= 5
+               (count (:rows results))))))
+    (testing "view: raises an exception when view is not found"
+      (is (thrown? clojure.lang.ExceptionInfo
+                   (view x "_design/my_doc" "not_found"))))
+    (testing "view: raises an exception when design_doc is not found"
+      (is (thrown? clojure.lang.ExceptionInfo
+                   (view x "_design/not_found" "by_gender"))))
+    (testing "view: can query views by startkey to endkey"
+      (let [results (view x "_design/ages" "people_by_age" {:startkey 20 :endkey 29})]
+        (is (= 4
+               (count (:rows results))))
+        (is (= "christina"
+               (:id (first (:rows results))))))
+      (let [results (view x "_design/ages" "people_by_age" {:startkey 31})]
+        ;;return only people 31 and above
+        (is (= 3
+               (count (:rows results))))
+        (is (= "lisa"
+               (:id (first (:rows results)))))))
+    (testing "view: can query startkey to endkey as a string"
+      (is (= 4
+             (count (:rows (view x "_design/my_doc" "by_gender" {:startkey "\"female\"" :endkey "\"female\""}))))))
+    (testing "view: can query with compound startkey and endkeys"
+      (let [results (view x
+                          "_design/gender_city"
+                          "people_by_gender_and_city"
+                          {:startkey "[\"female\", \"bronx\", 25]"
+                           :endkey "[\"female\", \"bronx\", 25]"})]
+        (is (= 1
+               (count (:rows results))))
+        (is (= "nancy"
+               (:id (first (:rows results)))))
+        (is (= ["female" "bronx" 25]
+               (:key (first (:rows results)))))))
     (do (delete x))))
