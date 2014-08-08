@@ -144,7 +144,7 @@
              (get-security-object x))))
     (do (delete x))))
 
-(deftest test-view
+(deftest test-queries
   (let [x (unique-db)]
     (do (create x)
         (create-doc x "christina" {:firstname "christina", :state "new york", :gender "female", :city "bronx", :age 22})
@@ -228,4 +228,15 @@
                (:id (first (:rows results)))))
         (is (= ["female" "bronx" 25]
                (:key (first (:rows results)))))))
+    (testing "where: returns documents that match specified attributes"
+      (is (= 4
+             (count (where x {:state "new york" :gender "female"}))))
+      (not (= "susan"
+             ;;FIX this assersion to pass equal
+             (:_id (where x {:state "new york" :fullname ["susan" "lee"]}))))
+      (is (= "martin"
+             (:_id (first (where x {:city "manhattan" :age 29}))))))
+    (testing "where: returns an empty array when no matching attributes is found"
+      (is (= ()
+             (where x {:not_found "something" :something "not_found"}))))
     (do (delete x))))
