@@ -144,6 +144,32 @@
              (get-security-object x))))
     (do (delete x))))
 
+(deftest test-config
+  (let [x (db "")]
+    (testing "it sets and gets a config setting"
+      (do (set-config x "couch_httpd_auth" "timeout" "6000"))
+      (is (= "6000"
+             (get-config x "couch_httpd_auth" "timeout"))))
+    (testing "it cannot get a config setting that doesnt exist"
+      (is (thrown? clojure.lang.ExceptionInfo
+                   (get-config x "dont_exist" "dont_exist"))))
+    (testing "deletes a config setting"
+      (do (set-config x "section" "option" "value"))
+      (is (= true
+             (delete-config x "section" "option")))
+      (is (thrown? clojure.lang.ExceptionInfo
+                   (get-config x "section" "option"))))
+    (testing "it cannot delete a config setting that don't exist"
+      (is (thrown? clojure.lang.ExceptionInfo
+                   (delete-config x "dont_exist" "dont_exist"))))
+    (testing "config setting's value must be set in correct format"
+      (are [a b] (= a b)
+           true (set-config x "section" "option" "value")
+           true (set-config x "section" "option" "true")
+           true (set-config x "section" "option" "900")
+           true (set-config x "section" "option" "[1]"))
+      (do (delete-config x "section" "option")))))
+
 (deftest test-queries
   (let [x (unique-db)]
     (do (create x)
@@ -240,3 +266,5 @@
       (is (= ()
              (where x {:not_found "something" :something "not_found"}))))
     (do (delete x))))
+
+
