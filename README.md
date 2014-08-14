@@ -4,6 +4,98 @@ Clojure Interface to CouchDB, I'm using this to learn Clojure. A clojure re-writ
 
 ## Usage
 
+### Installation:
+
+#### Basic Operations
+
+Database setup uses the db-setup function:
+```clojure
+(def x (db-setup {:database "my_database"}))
+```
+When username and password is required, i.e. CouchDB is not in admin party mode:
+```clojure
+(def x (db-setup {:database "my_database"
+                  :username "admin"
+                  :password "123456"}))
+```
+When using a different port and address for CouchDB not the default (http://127.0.0.1:5984):
+```clojure
+(def x (db-setup {:database "my_database"
+                  :address "https://obi.iriscouch.com"
+                  :port "6984"}))
+```
+Create the database:
+```clojure
+(create x)
+;; => {:ok true}
+```
+Delete the database:
+```clojure
+(delete x)
+;; => {:ok true}
+```
+Create a document with id "linda":
+```clojure
+(create-doc x "linda" {:firstname "linda"
+                       :lastname "smith"})
+;; => {:ok true, :id "linda", :rev "1-ff286690ab5b446a727840ce7420843a"}
+```
+The created document will be:
+```javascript
+{
+   "_id": "linda",
+   "_rev": "1-ff286690ab5b446a727840ce7420843a",
+   "firstname": "linda",
+   "lastname": "smith"
+}
+```
+Fetch document:
+```clojure
+(get-doc x "linda")
+;; => {:_id "linda", :_rev "1-ff286690ab5b446a727840ce7420843a", :firstname "linda", :lastname "smith"}
+```
+Delete document using a revision value:
+```clojure
+(delete-doc x "linda" "1-ff286690ab5b446a727840ce7420843a")
+;; => {:ok true, :id "linda", :rev "2-d689d9b5b9f2ded6a2157fc9cc84a00f"}
+```
+Document can also be deleted with no revision:
+```clojure
+(delete-doc x "linda")
+;; => {:ok true, :id "linda", :rev "4-5d1a6851ec7562378caa4ce4adef9ee4"}
+```
+Update the document, this replaces old document with new data, and requires a revision (_rev) to be included in the data:
+```clojure
+(update-doc x "linda" {:firstname "nancy"
+                       :lastname "drew"
+                       :_rev "5-74894db03ef6d22e6a0e4ef90b5a85fb"})
+;; => {:ok true, :id "linda", :rev "6-950d16c8c39daa77fad11de85b9467fc"}
+```
+The resulting document after the update will be:
+```javascript
+{
+   "_id": "linda",
+   "_rev": "6-950d16c8c39daa77fad11de85b9467fc",
+   "firstname": "nancy",
+   "lastname": "drew"
+}
+```
+Edit parts of a document, no revision required
+```clojure
+(edit-doc x "linda" {:lastname "brown"
+                     :phone "777-777-7777"})
+;; => {:ok true, :id "linda", :rev "7-cd16bd09becdd8db756dbc52c5aeab06"}
+```
+The edited version of the document
+```javascript
+{
+   "_id": "linda",
+   "_rev": "7-cd16bd09becdd8db756dbc52c5aeab06",
+   "phone": "777-777-7777",
+   "lastname": "brown"
+}
+```
+
 ##Specification
 Create design document
 
