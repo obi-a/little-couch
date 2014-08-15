@@ -52,7 +52,11 @@ The created document will be:
 Fetch document:
 ```clojure
 (get-doc x "linda")
-;; => {:_id "linda", :_rev "1-ff286690ab5b446a727840ce7420843a", :firstname "linda", :lastname "smith"}
+;; =>
+;; {:_id "linda",
+;;  :_rev "1-ff286690ab5b446a727840ce7420843a",
+;;  :firstname "linda",
+;;  :lastname "smith"}
 ```
 Delete document using a revision value:
 ```clojure
@@ -86,7 +90,7 @@ Edit parts of a document, no revision required
                      :phone "777-777-7777"})
 ;; => {:ok true, :id "linda", :rev "7-cd16bd09becdd8db756dbc52c5aeab06"}
 ```
-The edited version of the document
+The edited version of the document will be:
 ```javascript
 {
    "_id": "linda",
@@ -94,6 +98,92 @@ The edited version of the document
    "phone": "777-777-7777",
    "lastname": "brown"
 }
+```
+
+####Working with Desgin Documents and views
+
+Create a design document
+```clojure
+(create-doc x
+            "_design/my_doc"
+            {:language "javascript"
+             :views {
+                 :by_gender {
+                   :map "function(doc){ if(doc.gender) emit(doc.gender); }"
+                 }}})
+;; => {:ok true, :id "_design/my_doc", :rev "3-222b1f1716a195012fa291750e742e8e"}
+```
+Query a permanent view
+```clojure
+(view x "_design/my_doc" "by_gender")
+;; =>
+;; {:total_rows 7,
+;;  :offset 0,
+;;  :rows
+;;  [{:id "christina", :key "female", :value nil}
+;;   {:id "lisa", :key "female", :value nil}
+;;   {:id "nancy", :key "female", :value nil}
+;;   {:id "susan", :key "female", :value nil}
+;;   {:id "james", :key "male", :value nil}
+;;   {:id "kevin", :key "male", :value nil}
+;;   {:id "martin", :key "male", :value nil}]}
+```
+The view function can also optionally take the following CouchDB query options in a map as arguments: key, limit, skip, descending, include_docs, reduce, startkey, starkey_docid, endkey, endkey_docid, inclusive_end, stale, group, group_level.
+
+To query a permanent view by key
+```clojure
+(view x "_design/my_doc" "by_gender" {:key "\"male\""})
+;; =>
+;; {:total_rows 7,
+;;  :offset 4,
+;;  :rows
+;;  [{:id "james", :key "male", :value nil}
+;;   {:id "kevin", :key "male", :value nil}
+;;   {:id "martin", :key "male", :value nil}]}
+```
+The above example sends a query to the view using the key "male" and returns all documents with "gender" equal to "male".
+
+To include actual documents in the query results, add include_docs to the query options
+```clojure
+(view x "_design/my_doc" "by_gender" {:key "\"male\""
+                                      :include_docs true})
+;; =>
+;; {:total_rows 7,
+;;  :offset 4,
+;;  :rows
+;;  [{:id "james",
+;;    :key "male",
+;;   :value nil,
+;;   :doc
+;;   {:_id "james",
+;;    :_rev "1-56ff4f73369bdf8350615a58e12e4c3b",
+;;    :firstname "james",
+;;    :state "new york",
+;;    :gender "male",
+;;    :city "manhattan",
+;;    :age 23}}
+;;  {:id "kevin",
+;;   :key "male",
+;;   :value nil,
+;;   :doc
+;;   {:_id "kevin",
+;;    :_rev "1-3c6381603d9f15cb966948eb29218cf7",
+;;    :firstname "kevin",
+;;    :state "new york",
+;;    :gender "male",
+;;    :city "bronx",
+;;    :age 37}}
+;;  {:id "martin",
+;;   :key "male",
+;;   :value nil,
+;;   :doc
+;;   {:_id "martin",
+;;    :_rev "1-41956cd527d75643171919731abd97c0",
+;;    :firstname "martin",
+;;    :state "new york",
+;;    :gender "male",
+;;    :city "manhattan",
+;;    :age 29}}]}
 ```
 
 ##Specification
