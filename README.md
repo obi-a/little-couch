@@ -68,7 +68,7 @@ Document can also be deleted with no revision:
 (delete-doc x "linda")
 ;; => {:ok true, :id "linda", :rev "4-5d1a6851ec7562378caa4ce4adef9ee4"}
 ```
-Update the document, this replaces old document with new data, and requires a revision (_rev) to be included in the data:
+Update the document, this replaces the old document with new data, and requires a revision (_rev) to be included in the data:
 ```clojure
 (update-doc x "linda" {:firstname "nancy"
                        :lastname "drew"
@@ -85,6 +85,7 @@ The resulting document after the update will be:
 }
 ```
 Edit parts of a document, no revision required
+TODO: fix edit-doc problems
 ```clojure
 (edit-doc x "linda" {:lastname "brown"
                      :phone "777-777-7777"})
@@ -95,6 +96,7 @@ The edited version of the document will be:
 {
    "_id": "linda",
    "_rev": "7-cd16bd09becdd8db756dbc52c5aeab06",
+   "firstname": "nancy",
    "phone": "777-777-7777",
    "lastname": "brown"
 }
