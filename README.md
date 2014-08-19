@@ -52,8 +52,7 @@ The created document will be:
 Fetch document:
 ```clojure
 (get-doc x "linda")
-;; =>
-;; {:_id "linda",
+;; => {:_id "linda",
 ;;  :_rev "1-ff286690ab5b446a727840ce7420843a",
 ;;  :firstname "linda",
 ;;  :lastname "smith"}
@@ -85,7 +84,6 @@ The resulting document after the update will be:
 }
 ```
 Edit parts of a document, no revision required
-TODO: fix edit-doc problems
 ```clojure
 (edit-doc x "linda" {:lastname "brown"
                      :phone "777-777-7777"})
@@ -118,8 +116,7 @@ Create a design document
 Query a permanent view
 ```clojure
 (view x "_design/my_doc" "by_gender")
-;; =>
-;; {:total_rows 7,
+;; => {:total_rows 7,
 ;;  :offset 0,
 ;;  :rows
 ;;  [{:id "christina", :key "female", :value nil}
@@ -135,8 +132,7 @@ The view function can also optionally take the following CouchDB query options i
 To query a permanent view by key
 ```clojure
 (view x "_design/my_doc" "by_gender" {:key "\"male\""})
-;; =>
-;; {:total_rows 7,
+;; => {:total_rows 7,
 ;;  :offset 4,
 ;;  :rows
 ;;  [{:id "james", :key "male", :value nil}
@@ -149,8 +145,7 @@ To include actual documents in the query results, add include_docs to the query 
 ```clojure
 (view x "_design/my_doc" "by_gender" {:key "\"male\""
                                       :include_docs true})
-;; =>
-;; {:total_rows 7,
+;; => {:total_rows 7,
 ;;  :offset 4,
 ;;  :rows
 ;;  [{:id "james",
@@ -187,6 +182,41 @@ To include actual documents in the query results, add include_docs to the query 
 ;;    :city "manhattan",
 ;;    :age 29}}]}
 ```
+To return results in descending order:
+```clojure
+(view x "_design/my_doc" "by_gender" {:key "\"male\""
+                                      :descending true})
+;; => {:total_rows 7,
+;;  :offset 0,
+;;  :rows
+;;  [{:id "martin", :key "male", :value nil}
+;;   {:id "kevin", :key "male", :value nil}
+;;   {:id "james", :key "male", :value nil}]}
+```
+To limit the number of documents returned from the query
+```clojure
+(view x "_design/my_doc" "by_gender" {:limit 4})
+;; => {:total_rows 7,
+;;  :offset 0,
+;;  :rows
+;;  [{:id "christina", :key "female", :value nil}
+;;   {:id "lisa", :key "female", :value nil}
+;;   {:id "nancy", :key "female", :value nil}
+;;   {:id "susan", :key "female", :value nil}]}
+```
+Skip some documents in the query
+```clojure
+(view x "_design/my_doc" "by_gender" {:skip 2})
+;; => {:total_rows 7,
+;;  :offset 2,
+;;  :rows
+;;  [{:id "nancy", :key "female", :value nil}
+;;   {:id "susan", :key "female", :value nil}
+;;   {:id "james", :key "male", :value nil}
+;;   {:id "kevin", :key "male", :value nil}
+;;   {:id "martin", :key "male", :value nil}]}
+```
+
 
 ##Specification
 Create design document
