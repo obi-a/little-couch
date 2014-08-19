@@ -63,11 +63,10 @@
 
  (defn edit-doc
    [x, doc-id, data-map]
-   (update-doc x
-               doc-id
-               (assoc data-map
-                      :_rev (:_rev (get-doc x
-                                            doc-id)))))
+   (let [doc-with-rev (get-doc x doc-id)]
+     (update-doc x
+                 doc-id
+                 (merge doc-with-rev data-map))))
 
  (defn view
    [x, design-doc-name, view-name, & rest]

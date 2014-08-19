@@ -113,10 +113,11 @@
     (do (create x)
         (create-doc x "simpson" {:firstname "bart" :lastname "simpson"}))
     (testing "it edits a document's existing data"
-      (is (= true
-             (:ok (edit-doc x "simpson" {:firstname "homer"}))))
-      (is (= "homer"
-             (:firstname (get-doc x "simpson")))))
+      (do (edit-doc x "simpson" {:firstname "homer"}))
+        (let [doc (get-doc x "simpson")]
+           (are [a b] (= a b)
+             "homer" (:firstname doc)
+             "simpson" (:lastname doc))))
     (testing "it edits a document adding new data"
       (is (= true
              (:ok (edit-doc x "simpson" {:email "simpson@example.com"}))))
