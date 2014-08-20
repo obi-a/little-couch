@@ -217,128 +217,62 @@ Skip some documents in the query
 ;;   {:id "martin", :key "male", :value nil}]}
 ```
 
-
-##Specification
-Create design document
-
+####Dynamic Queries
+Dynamic queries can be performed on documents using the ```where``` function, example to fetch all documents that match the attributes {city: "bronx", gender: "female"}. This returns a sequence of all the documents with the match attributes.
 ```clojure
-(def x (db-setup {:database "my_database"}))
-
-;;form: (create-doc x doc-id data)
-
-(create-doc x
-            "_design/my_doc"
-            {:language "javascript",
-             :views {
-               :get_emails {
-                             :map "function(doc){ if(doc.firstname && doc.email) emit(doc.id,{Name: doc.firstname, Email: doc.email}); }"
-                           }}})
-;;{:ok true, :id "_design/my_doc", :rev "1-271b38abf2ac551c5263be4ba9ab56df"}
-
-(get-doc x "_design/my_doc")
-;;{:_id "_design/my_doc", :_rev "1-271b38abf2ac551c5263be4ba9ab56df", :language "javascript", :views {:get_emails {:map "function(doc){ if(doc.firstname && doc.email) emit(doc.id,{Name: doc.firstname, Email: doc.email}); }"}}}
+(where x {:city "bronx", :gender "female"})
+;; => ({:_id "christina",
+;;  :_rev "1-e9782aa92f7d88eb5dc5e1a878c8e193",
+;;  :firstname "christina",
+;;  :state "new york",
+;;  :gender "female",
+;;  :city "bronx",
+;;  :age 22}
+;; {:_id "nancy",
+;;  :_rev "1-44ac471d9e6433eaa6e67607c7a175c9",
+;;  :firstname "nancy",
+;;  :state "new york",
+;;  :gender "female",
+;;  :city "bronx",
+;;  :age 25})
 ```
-
-Query the view
-
+```where``` supports options skip, limit, descending. Example to return documents in descending order;
 ```clojure
-;;form: (view x design-doc-name view-name options-map)
-
-(view x
-      "_design/my_doc"
-      "get_emails")
-;;{:total_rows 2, :offset 0, :rows [{:id "linda", :key nil, :value {:Name "linda", :Email "linda@southmunn.com"}} {:id "sam", :key nil, :value {:Name "sam", :Email "obi@cc.com"}}]}
-
-
-(view x
-      "_design/my_doc"
-      "get_emails"
-      {:limit 1
-       :descending true
-       :include_docs true})
-;;{:total_rows 2, :offset 0, :rows [{:id "sam", :key nil, :value {:Name "sam", :Email "obi@cc.com"}, :doc {:_id "sam", :_rev "6-4aad2696c425c3782d6dc9d18c596564", :nice "watch", :email "obi@cc.com", :firstname "sam"}}]}
-
+(where x
+       {:city "bronx", :gender "female"}
+       {:descending true})
+;; => ({:_id "nancy",
+;;  :_rev "1-44ac471d9e6433eaa6e67607c7a175c9",
+;;  :firstname "nancy",
+;;  :state "new york",
+;;  :gender "female",
+;;  :city "bronx",
+;;  :age 25}
+;; {:_id "christina",
+;;  :_rev "1-e9782aa92f7d88eb5dc5e1a878c8e193",
+;;  :firstname "christina",
+;;  :state "new york",
+;;  :gender "female",
+;;  :city "bronx",
+;;  :age 22})
 ```
+See Ruby's [Leanback](https://github.com/obi-a/leanback/blob/master/README.md#dynamic-queries) for details on how ```where``` works
 
-Dynamic Queries
-```clojure
-;;form: where(x attributes-map options-map)
-```
-
-Sample usage
-```clojure
-(create-doc x
-            "christina"
-            {:firstname "christina"
-             :state "new york"
-             :gender "female"
-             :city "bronx"
-             :age 22})
-
-(create-doc x
-            "james"
-            {:firstname "james"
-             :state "new york"
-             :gender "male"
-             :city "manhattan"
-             :age 23})
-
-(create-doc x
-            "kevin"
-            {:firstname "kevin"
-             :state "new york"
-             :gender "male"
-             :city "bronx"
-             :age 37})
-
-(create-doc x
-            "lisa"
-            {:firstname "lisa"
-             :state "new york"
-             :gender "female"
-             :city "manhattan"
-             :age 31})
-
-(create-doc x
-            "_design/gender_city"
-            {:language "javascript",
-             :views {
-                       :people_by_gender_and_city {
-                              :map "function(doc){ if(doc.gender && doc.city && doc.age) emit([doc.gender, doc.city, doc.age]);}"
-                            }}})
-(view x
-      "_design/gender_city"
-      "people_by_gender_and_city"
-      {:startkey  "[\"female\", \"bronx\", 22]"
-       :endkey  "[\"female\", \"bronx\", 22]"})
-;;{:total_rows 4, :offset 0, :rows [{:id "christina", :key ["female" "bronx" 22], :value nil}]}
-
-(where x {:city "bronx"})
-;;"({:_id christina, :_rev 2-4ea790e405726bebe5967da666b98435, :age 22, :gender female, :state new york, :city bronx, :firstname christina, :email aol} {:_id kevin, :_rev 1-eed2e9e37bd289a4acbbc4fb9329cfe2, :age 37, :gender male, :state new york, :city bronx, :firstname kevin})"
-
-(where x {:city "bronx"})
-;;"({:_id christina, :_rev 2-4ea790e405726bebe5967da666b98435, :age 22, :gender female, :state new york, :city bronx, :firstname christina, :email aol} {:_id kevin, :_rev 1-eed2e9e37bd289a4acbbc4fb9329cfe2, :age 37, :gender male, :state new york, :city bronx, :firstname kevin})"
-
-(where x {:city "bronx" :gender "male"})
-;;"({:_id kevin, :_rev 1-eed2e9e37bd289a4acbbc4fb9329cfe2, :age 37, :gender male, :state new york, :city bronx, :firstname kevin})"
-
-(where x {:gender "female" :age 22 :email "aol"})
-;;"({:_id christina, :_rev 2-4ea790e405726bebe5967da666b98435, :age 22, :gender female, :state new york, :city bronx, :firstname christina, :email aol})"
-
-```
-
-Security object
-
+####Security Object
+To set the database security object
 ```clojure
 (set-security-object x {:admins {:names ["david"], :roles ["admin"]},
-                         :readers {:names ["david"], :roles ["admin"]}})
-;;{:ok true}
-
-(get-security_object x)
-;;{:readers {:roles ["admin"], :names ["david"]}, :admins {:roles ["admin"], :names ["david"]}}
+                        :readers {:names ["david"], :roles ["admin"]}})
+;; => {:ok true}
 ```
-
-CouchDB Configuration
+Retrieve the security object
+```clojure
+(get-security-object x)
+;; => {:readers {:roles ["admin"], :names ["david"]},
+;; :admins {:roles ["admin"], :names ["david"]}}
+```
+####CouchDB Configuration API
+To retrieve a couchDB configuration
 ```clojure
 (def y (db-setup))
 
@@ -346,27 +280,28 @@ CouchDB Configuration
 ;;returns corresonding for the option value
 
 (get-config y "log" "file")
-;;"/var/log/couchdb/couch.log"
+;; => "/var/log/couchdb/couch.log"
 
 (get-config y "httpd" "port")
-;;"5984"
-
-
+;; => "5984"
+```
+To set a configuration:
+```clojure
 ;;form: (set-config y section option value)
 
 (set-config y "couch_httpd_auth" "timeout" "6000")
 ;;true
 
 (get-config y "couch_httpd_auth" "timeout")
-;;"6000"
-
-
+;; => "6000"
+```
+To delete a configuration:
+```clojure
 ;;form: (delete-config y section option)
 
 (delete-config y "foo" "bar")
-;;true
+;; => true
 ```
-
 
 ## License
 

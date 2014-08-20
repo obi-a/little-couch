@@ -1,4 +1,4 @@
-(defproject little-couch "0.1.0-SNAPSHOT"
+(defproject little-couch "0.1.0"
   :description "Simple Clojure interface to CouchDB"
   :url "http://example.com/FIXME"
   :license {:name "Eclipse Public License"
