@@ -2,9 +2,12 @@
 
 Clojure Interface to CouchDB, I'm using this to learn Clojure. A clojure re-write of [Ruby's Leanback gem](https://github.com/obi-a/leanback).
 
+[![Clojars Project](http://clojars.org/little-couch/latest-version.svg)](http://clojars.org/little-couch)
+
 ## Usage
 
 ### Installation:
+
 
 #### Basic Operations
 
