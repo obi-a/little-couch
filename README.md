@@ -107,13 +107,18 @@ The edited version of the document will be:
 
 Create a design document
 ```clojure
+(def document (assoc-in {:language "javascript"}
+                        [:views :by_gender :map]
+                        "function(doc){ if(doc.gender) emit(doc.gender); }"))
+document
+;; => {:language "javascript",
+;; :views
+;; {:by_gender
+;;  {:map "function(doc){ if(doc.gender) emit(doc.gender); }"}}}
+
 (create-doc x
             "_design/my_doc"
-            {:language "javascript"
-             :views {
-                 :by_gender {
-                   :map "function(doc){ if(doc.gender) emit(doc.gender); }"
-                 }}})
+            document)
 ;; => {:ok true, :id "_design/my_doc", :rev "3-222b1f1716a195012fa291750e742e8e"}
 ```
 Query a permanent view
